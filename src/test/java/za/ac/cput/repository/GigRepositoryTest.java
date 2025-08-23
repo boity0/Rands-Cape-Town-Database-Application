@@ -1,56 +1,32 @@
 package za.ac.cput.repository;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import za.ac.cput.domain.Gig;
-import za.ac.cput.factory.GigFactory;
+
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Set;
-
+@SpringBootTest
 class GigRepositoryTest {
+
+    @Autowired
     private GigRepository repository;
-    private Gig gig;
-
-    @BeforeEach
-    void setUp() {
-        repository = GigRepository.getInstance();
-        gig = GigFactory.createGig(1, 5000.0, "Cape Town Stadium");
-        repository.create(gig);
-    }
 
     @Test
-    void create() {
-        Gig newGig = GigFactory.createGig(2, 7000.0, "Johannesburg Arena");
-        Gig created = repository.create(newGig);
-        assertNotNull(created);
-        assertEquals(2, created.getGigId());
-    }
+    void testSaveAndFind() {
+        Gig gig = new Gig.Builder()
+                .setGigVenue("Cape Town")
+                .setGigFee(400.0)
+                .build();
 
-    @Test
-    void read() {
-        Gig foundGig = repository.read(1);
-        assertNotNull(foundGig);
-        assertEquals(1, foundGig.getGigId());
-    }
+        Gig saved = repository.save(gig);
+        assertNotNull(saved.getGigId());
 
-    @Test
-    void update() {
-        Gig updatedGig = new Gig.Builder().setGigId(1).setGigSalary(6000.0).setGigVenue("New Venue").build();
-        Gig updated = repository.update(updatedGig);
-        assertNotNull(updated);
-        assertEquals("New Venue", updated.getGigVenue());
-    }
-
-    @Test
-    void delete() {
-        assertTrue(repository.delete(1));
-        assertNull(repository.read(1));
-    }
-
-    @Test
-    void getAll() {
-        Set<Gig> gigs = repository.getAll();
-        assertFalse(gigs.isEmpty());
+        Optional<Gig> found = repository.findById(saved.getGigId());
+        assertTrue(found.isPresent());
+        assertEquals("Cape Town", found.get().getGigVenue());
     }
 }
+
